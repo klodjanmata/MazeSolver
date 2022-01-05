@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #define MAZE_SIZE 10
 #define STACK_SIZE 30
@@ -7,10 +9,7 @@
 typedef struct
 {
     int x, y;
-} coordinate;
-
-coordinate stack[STACK_SIZE];
-int top = -1;
+} cordinate;
 
 int maze[MAZE_SIZE][MAZE_SIZE] = {
     {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
@@ -24,75 +23,84 @@ int maze[MAZE_SIZE][MAZE_SIZE] = {
     {0, 0, 0, 1, 1, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 1, 0, 0, 0, 0, 0}};
 
-int isempty()
+struct Stack
 {
+    int top;
+    unsigned capacity;
+    cordinate *array;
+};
 
-    if (top == -1)
-        return 1;
-    else
-        return 0;
+// function to create a stack of given capacity. It initializes size of
+// stack as 0
+struct Stack *createStack(unsigned capacity)
+{
+    struct Stack *stack = (struct Stack *)malloc(sizeof(struct Stack));
+    stack->capacity = capacity;
+    stack->top = -1;
+    stack->array = (cordinate *)malloc(stack->capacity * sizeof(cordinate));
+    return stack;
 }
 
-int isfull()
+// Stack is full when top is equal to the last index
+int isFull(struct Stack *stack)
 {
-
-    if (top == STACK_SIZE)
-        return 1;
-    else
-        return 0;
+    return stack->top == stack->capacity - 1;
 }
 
-coordinate peek()
+// Stack is empty when top is equal to -1
+int isEmpty(struct Stack *stack)
 {
-    return stack[top];
+    return stack->top == -1;
 }
 
-coordinate pop()
+// Function to add an item to stack.  It increases top by 1
+void push(struct Stack *stack, cordinate item)
 {
-    if (!isempty())
-    {
-        coordinate data = stack[top];
-        top = top - 1;
-        return data;
-    }
-    else
-    {
-        printf("Stack is empty.\n");
-        coordinate data;
-        data.x = -1;
-        data.y = -1;
-        return data;
-    }
+    if (isFull(stack))
+        return;
+    stack->array[++stack->top] = item;
+    printf("(%d, %d) pushed to stack\n", item.x, item.y);
 }
 
-void push(coordinate data)
+void push_separately(struct Stack *stack, int x, int y)
 {
-    if (!isfull())
-    {
-        top = top + 1;
-        stack[top] = data;
-    }
-    else
-    {
-        printf("Could not insert data, Stack is full.\n");
-    }
+    if (isFull(stack))
+        return;
+    cordinate item;
+    item.x = x;
+    item.y = y;
+    stack->array[++stack->top] = item;
+    printf("(%d, %d) pushed to stack\n", item.x, item.y);
 }
 
-int find_entrance(int v[], int n)
+// Function to remove an item from stack.  It decreases top by 1
+cordinate pop(struct Stack *stack)
 {
-    int i;
-    for (i = 0; i < n; i++)
-    {
-        if (v[i] == 1)
-        {
-            return i;
-        }
-    }
-    return -1;
+    if (isEmpty(stack))
+        return;
+    printf("(%d, %d) poped to stack\n", stack->array[stack->top].x, stack->array[stack->top].y);
+    return stack->array[stack->top--];
 }
 
-int main(void)
+// Function to return the top from stack without removing it
+cordinate peek(struct Stack *stack)
 {
+    if (isEmpty(stack))
+        return;
+    return stack->array[stack->top];
+}
+
+// Driver program to test above functions
+int main()
+{
+    struct Stack *stack = createStack(STACK_SIZE);
+    cordinate item;
+    item.x = 2;
+    item.y = 3;
+    push_separately(stack, 10, 10);
+    push(stack, item);
+    push(stack, item);
+    item = pop(stack);
 
     return 0;
 }
